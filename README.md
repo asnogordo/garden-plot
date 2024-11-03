@@ -1,14 +1,10 @@
-# Garden Finance Bot
+# Garden Plot Discord Text game
 
-Discord BOT
+Discord based text game themed for a garden
 
 ## Active bots
 
 ### PROD
-
-This is the bot active on [Garden's Discord server](https://discord.com/invite/Fp4ZmZZrFu)
-
-Use this [bot invite](https://discord.com/api/oauth2/authorize?client_id=913903801033981952&permissions=2147560448&scope=bot) to add it to a Discord server.
 
 ### TEST
 This is a test bot where new features should be deployed first before hitting production.
@@ -32,8 +28,8 @@ Out of the scope of this README, but in summary [something like this](https://ww
 ### With Docker
 
 ```bash
-docker build . -t garden-bot
-docker run -d --env-file .env garden-bot
+docker build . -t garden-plot
+docker run -d --env-file .env garden-plot
 ```
 
 To see the logs

@@ -2,9 +2,8 @@ require('dotenv').config();
 const { Client, GatewayIntentBits, Collection, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
-const { checkTransfers } = require('./transactionMonitor');
 const config = require('./config');
-const { handleMessage,celebratoryGifs } = require('./messageHandlers');
+const { handleMessage } = require('./messageHandlers');
 const { REST, Routes } = require('discord.js');
 const gardenSystem = require('./gardenSystem');
 const weatherSystem = require('./weather');
@@ -21,7 +20,6 @@ const client = new Client({
 });
 
 client.commands = new Collection();
-client.suspectedScammers = new Map(); // Add this line to store suspectedScammers
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
@@ -54,8 +52,6 @@ const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
 
 client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}!`);
-  setInterval(() => checkTransfers(client), config.POLL_INTERVAL);
-
   await weatherSystem.checkAndUpdateForecast();
   setInterval(async () => {
     await weatherSystem.checkAndUpdateForecast();
@@ -76,47 +72,6 @@ client.on('interactionCreate', async interaction => {
   } catch (error) {
       console.error(error);
       await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-  }
-});
-
-client.on('interactionCreate', async interaction => {
-  if (!interaction.isButton()) return;
-
-  if (interaction.customId.startsWith('ban_')) {
-    const userId = interaction.customId.split('_')[1];
-    const guild = interaction.guild;
-    const moderator = interaction.user;
-    if (isAboveBaseRole(interaction.member)) {
-      try {
-        // Ban the user
-        await guild.members.ban(userId, { reason: 'Banned due to suspicious activity' });
-        
-        // Log the action in the thread
-        const logEmbed = new EmbedBuilder()
-          .setColor('#FF0000')
-          .setTitle('User Banned')
-          .setDescription(`User <@${userId}> has been banned.`)
-          .addFields(
-            { name: 'Banned by', value: `${moderator.tag} (${moderator.id})` },
-            { name: 'Ban Time', value: new Date().toUTCString() }
-          );
-        
-        await interaction.reply({ embeds: [logEmbed] });
-
-        // Send a random celebratory GIF
-        const randomGif = celebratoryGifs[Math.floor(Math.random() * celebratoryGifs.length)];
-        await interaction.followUp({ content: `Nice Ban! Mission accomplished! 🎉`, files: [randomGif] });
-        
-        // Optional: Archive the thread
-        await interaction.channel.setArchived(true, 'User has been banned');
-      } catch (error) {
-        console.error('Failed to ban user:', error);
-        await interaction.reply({ content: 'Failed to ban user. Please check logs.', ephemeral: true });
-      }
-    }
-    else {
-      await interaction.reply("You don't have permission to use this command.");
-    }
   }
 });
 
