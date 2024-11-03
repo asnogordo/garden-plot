@@ -125,7 +125,7 @@ module.exports = {
         break;
       case 'water':
           try {
-            const result = await gardenSystem.waterGarden(interaction.user.id);
+            const result = await waterGarden(interaction.user.id);
             await interaction.reply(result.message);
           } catch (error) {
             console.error('Error watering garden:', error);
